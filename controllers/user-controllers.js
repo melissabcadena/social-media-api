@@ -32,7 +32,10 @@ const userController = {
     createUser({ body }, res) {
         User.create(body)
         .then(dbUserData => res.json(dbUserData))
-        .catch(err => res.json(err));
+        .catch(err => {
+            console.log(err)
+            res.json(err);
+        });
     },
     //update a user by its id
     updateUser({ params, body }, res) {
@@ -63,26 +66,28 @@ const userController = {
     // Friend Controllers 
     
     // POST to add new friend to user's friend list
-    addFriend({ params}, res) {
+    addFriend({ params }, res) {
         User.findOneAndUpdate(
             { _id: params.userId },
-          { $push: { friends: body } },
-          { new: true, runValidators: true }
+          { $push: { friends: params.friendId } },
+          { new: true}
         )
-        .then(dbThoughtData => {
-        if (!dbThoughtData) {
-            res.status(404).json({ message: 'No thought found with this id!' });
-            return;
+        .then((dbFriendData) => {
+        if (!dbFriendData) {
+            return res.status(404).json({ message: 'No user found with this id!' });
         }
-        res.json(dbThoughtData);
+        res.json(dbFriendData);
         })
-        .catch(err => res.json(err));
+        .catch((err) => {
+            console.log(err)
+            res.json(err)
+        });
     },
     // remove friend from friend list
     removeFriend({ params }, res) {
         User.findOneAndUpdate(
           { _id: params.userId },
-          { $pull: { replies: { friendId: params.frienId } } },
+          { $pull: { friends: params.friendId } },
           { new: true }
         )
           .then(dbUserData => res.json(dbUserData))
